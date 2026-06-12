@@ -420,7 +420,7 @@ public class CommandProcessor {
                     new ServiceHeartbeatCommandHandler(serviceManager));
             Log.d(TAG, "✅ Registered ServiceHeartbeatCommandHandler");
 
-            commandHandlerRegistry.registerHandler(new BleConfigCommandHandler());
+            commandHandlerRegistry.registerHandler(new BleConfigCommandHandler(serviceManager));
             Log.d(TAG, "✅ Registered BleConfigCommandHandler");
 
             commandHandlerRegistry.registerHandler(
