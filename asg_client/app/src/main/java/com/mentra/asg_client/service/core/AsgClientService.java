@@ -19,6 +19,7 @@ import android.util.Log;
 import android.util.Size;
 import com.dev.api.DevApi;
 import com.mentra.asg_client.camera.UvcStreamingState;
+import com.mentra.asg_client.io.bluetooth.interfaces.ICompanionTransport;
 import com.mentra.asg_client.io.bluetooth.interfaces.TransportListener;
 import com.mentra.asg_client.io.file.core.FileManager;
 import com.mentra.asg_client.io.hardware.interfaces.IHardwareManager;
@@ -26,6 +27,7 @@ import com.mentra.asg_client.io.hardware.interfaces.RgbLedConstants;
 import com.mentra.asg_client.io.media.core.MediaCaptureService;
 import com.mentra.asg_client.io.media.interfaces.ServiceCallbackInterface;
 import com.mentra.asg_client.io.media.managers.MediaUploadQueueManager;
+import com.mentra.asg_client.io.network.interfaces.INetworkManager;
 import com.mentra.asg_client.io.network.interfaces.NetworkStateListener;
 import com.mentra.asg_client.io.ota.helpers.OtaHelper;
 import com.mentra.asg_client.io.ota.interfaces.IBesOtaRegistry;
@@ -74,6 +76,12 @@ public class AsgClientService extends Service implements NetworkStateListener, T
 
     /** Vendor-supplied protocol detection strategies (e.g. the Mentra Live MCU wire format). */
     @Inject Set<CommandProtocolDetector.ProtocolDetectionStrategy> protocolStrategies;
+
+    /** Device-appropriate companion transport, constructed by the vendor wiring layer. */
+    @Inject ICompanionTransport companionTransport;
+
+    /** Device-appropriate network manager, constructed by the vendor wiring layer. */
+    @Inject INetworkManager injectedNetworkManager;
 
     // ---------------------------------------------
     // Constants //TODO: Extract all the Constants and Magic Number/Text to AsgConstants
@@ -643,6 +651,8 @@ public class AsgClientService extends Service implements NetworkStateListener, T
             serviceInitializer =
                     new ServiceInitializer(
                             this,
+                            companionTransport,
+                            injectedNetworkManager,
                             fileManager,
                             otaHelper,
                             hardwareManager,
