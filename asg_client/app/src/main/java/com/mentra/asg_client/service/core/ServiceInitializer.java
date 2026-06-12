@@ -31,6 +31,7 @@ import com.mentra.asg_client.service.core.handlers.subscribers.SwitchEventSubscr
 import com.mentra.asg_client.service.core.handlers.subscribers.TouchEventSubscriber;
 import com.mentra.asg_client.service.core.handlers.subscribers.VoiceActivityEventSubscriber;
 import com.mentra.asg_client.service.core.processors.CommandProcessor;
+import com.mentra.asg_client.service.core.processors.CommandProtocolDetector;
 import com.mentra.asg_client.service.legacy.managers.AsgClientServiceManager;
 import com.mentra.asg_client.service.media.interfaces.IMediaManager;
 import com.mentra.asg_client.service.media.managers.MediaManager;
@@ -41,6 +42,7 @@ import com.mentra.asg_client.service.system.managers.AsgNotificationManager;
 import com.mentra.asg_client.service.system.managers.ConfigurationManager;
 import com.mentra.asg_client.service.system.managers.ServiceLifecycleManager;
 import com.mentra.asg_client.service.system.managers.StateManager;
+import java.util.Set;
 
 /** Wires core service components (replaces the former {@link ServiceContainer}). */
 public final class ServiceInitializer {
@@ -62,7 +64,8 @@ public final class ServiceInitializer {
             @NonNull FileManager fileManager,
             @NonNull OtaHelper otaHelper,
             @NonNull IHardwareManager hardwareManager,
-            @NonNull BesOtaRegistry besOtaRegistry) {
+            @NonNull BesOtaRegistry besOtaRegistry,
+            @NonNull Set<CommandProtocolDetector.ProtocolDetectionStrategy> protocolStrategies) {
         android.content.Context context = service;
 
         // Create transport and network first — both are passed to CommunicationManager and
@@ -122,7 +125,8 @@ public final class ServiceInitializer {
                         fileManager,
                         rgbLedHandler,
                         otaCommandHandler,
-                        peripheralBus);
+                        peripheralBus,
+                        protocolStrategies);
 
         this.lifecycleManager =
                 new ServiceLifecycleManager(

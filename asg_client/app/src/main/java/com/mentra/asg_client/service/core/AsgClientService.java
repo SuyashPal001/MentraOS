@@ -34,6 +34,7 @@ import com.mentra.asg_client.io.streaming.events.StreamingEvent;
 import com.mentra.asg_client.logging.BleTraceLogger;
 import com.mentra.asg_client.service.communication.interfaces.ICommunicationManager;
 import com.mentra.asg_client.service.core.processors.CommandProcessor;
+import com.mentra.asg_client.service.core.processors.CommandProtocolDetector;
 import com.mentra.asg_client.service.media.interfaces.IMediaManager;
 import com.mentra.asg_client.service.system.core.SystemControllerFactory;
 import com.mentra.asg_client.service.system.interfaces.IConfigurationManager;
@@ -46,6 +47,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import org.greenrobot.eventbus.EventBus;
@@ -69,6 +71,9 @@ public class AsgClientService extends Service implements NetworkStateListener, T
     @Inject OtaHelper otaHelper;
     @Inject IHardwareManager hardwareManager;
     @Inject BesOtaRegistry besOtaRegistry;
+
+    /** Vendor-supplied protocol detection strategies (e.g. the Mentra Live MCU wire format). */
+    @Inject Set<CommandProtocolDetector.ProtocolDetectionStrategy> protocolStrategies;
 
     // ---------------------------------------------
     // Constants //TODO: Extract all the Constants and Magic Number/Text to AsgConstants
@@ -637,7 +642,12 @@ public class AsgClientService extends Service implements NetworkStateListener, T
         try {
             serviceInitializer =
                     new ServiceInitializer(
-                            this, fileManager, otaHelper, hardwareManager, besOtaRegistry);
+                            this,
+                            fileManager,
+                            otaHelper,
+                            hardwareManager,
+                            besOtaRegistry,
+                            protocolStrategies);
             Log.d(TAG, "✅ ServiceInitializer created successfully");
 
             // Initialize container
