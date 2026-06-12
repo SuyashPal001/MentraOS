@@ -19,7 +19,6 @@ import android.util.Log;
 import android.util.Size;
 import com.dev.api.DevApi;
 import com.mentra.asg_client.camera.UvcStreamingState;
-import com.mentra.asg_client.io.bes.BesOtaRegistry;
 import com.mentra.asg_client.io.bluetooth.interfaces.TransportListener;
 import com.mentra.asg_client.io.file.core.FileManager;
 import com.mentra.asg_client.io.hardware.interfaces.IHardwareManager;
@@ -29,6 +28,7 @@ import com.mentra.asg_client.io.media.interfaces.ServiceCallbackInterface;
 import com.mentra.asg_client.io.media.managers.MediaUploadQueueManager;
 import com.mentra.asg_client.io.network.interfaces.NetworkStateListener;
 import com.mentra.asg_client.io.ota.helpers.OtaHelper;
+import com.mentra.asg_client.io.ota.interfaces.IBesOtaRegistry;
 import com.mentra.asg_client.io.ota.utils.OtaConstants;
 import com.mentra.asg_client.io.streaming.events.StreamingEvent;
 import com.mentra.asg_client.logging.BleTraceLogger;
@@ -70,7 +70,7 @@ public class AsgClientService extends Service implements NetworkStateListener, T
     @Inject FileManager fileManager;
     @Inject OtaHelper otaHelper;
     @Inject IHardwareManager hardwareManager;
-    @Inject BesOtaRegistry besOtaRegistry;
+    @Inject IBesOtaRegistry besOtaRegistry;
 
     /** Vendor-supplied protocol detection strategies (e.g. the Mentra Live MCU wire format). */
     @Inject Set<CommandProtocolDetector.ProtocolDetectionStrategy> protocolStrategies;

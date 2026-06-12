@@ -18,11 +18,11 @@ import android.os.Looper;
 import android.util.Log;
 import com.mentra.asg_client.di.hilt.AsgClientEntryPoint;
 import com.mentra.asg_client.events.BatteryStatusEvent;
-import com.mentra.asg_client.io.bes.BesOtaManager;
-import com.mentra.asg_client.io.bes.BesOtaRegistry;
 import com.mentra.asg_client.io.ota.events.DownloadProgressEvent;
 import com.mentra.asg_client.io.ota.events.InstallationProgressEvent;
 import com.mentra.asg_client.io.ota.events.MtkOtaProgressEvent;
+import com.mentra.asg_client.io.ota.interfaces.IBesOtaController;
+import com.mentra.asg_client.io.ota.interfaces.IBesOtaRegistry;
 import com.mentra.asg_client.io.ota.session.OtaSessionManager;
 import com.mentra.asg_client.io.ota.utils.FirmwareDownloadException;
 import com.mentra.asg_client.io.ota.utils.OtaConstants;
@@ -218,9 +218,9 @@ public class OtaHelper {
     private String lastOtaPhoneEventStatus;
     private String lastOtaPhoneError;
 
-    private final BesOtaRegistry besOtaRegistry;
+    private final IBesOtaRegistry besOtaRegistry;
 
-    public OtaHelper(Context context, BesOtaRegistry besOtaRegistry) {
+    public OtaHelper(Context context, IBesOtaRegistry besOtaRegistry) {
         this.besOtaRegistry = besOtaRegistry;
         this.context =
                 context.getApplicationContext(); // Use application context to avoid memory leaks
@@ -275,6 +275,22 @@ public class OtaHelper {
         } else {
             Log.i(TAG, "Autonomous OTA mode DISABLED - updates only via phone app");
         }
+    }
+
+    /**
+     * @return the active BES OTA controller, or null if BES OTA is not initialized (non-K900
+     *     devices, or before the transport is ready)
+     */
+    private IBesOtaController getOtaController() {
+        return besOtaRegistry.getInstance();
+    }
+
+    /**
+     * @return true if a BES OTA update is currently in progress; false when no controller exists
+     */
+    private boolean isBesOtaInProgress() {
+        IBesOtaController controller = getOtaController();
+        return controller != null && controller.isBesOtaInProgress();
     }
 
     public void cleanup() {
@@ -556,7 +572,7 @@ public class OtaHelper {
             pruneOneCacheEntry(CACHE_KEY_APK_ASG, UPDATE_TYPE_APK);
             pruneOneCacheEntry(CACHE_KEY_APK_RECOVERY, UPDATE_TYPE_APK);
             pruneOneCacheEntry(CACHE_KEY_MTK, UPDATE_TYPE_MTK);
-            if (!BesOtaManager.isBesOtaInProgress) {
+            if (!isBesOtaInProgress()) {
                 pruneOneCacheEntry(CACHE_KEY_BES, UPDATE_TYPE_BES);
             }
         } catch (Exception e) {
@@ -1025,7 +1041,7 @@ public class OtaHelper {
                         + ", mtkInProgress="
                         + isMtkOtaInProgress
                         + ", besInProgress="
-                        + BesOtaManager.isBesOtaInProgress
+                        + isBesOtaInProgress()
                         + ", versionJsonUrl="
                         + versionJsonUrl);
 
@@ -1665,7 +1681,7 @@ public class OtaHelper {
             currentUpdateType = "apk";
 
             // Check for mutual exclusion - don't start APK update if firmware update in progress
-            if (BesOtaManager.isBesOtaInProgress) {
+            if (isBesOtaInProgress()) {
                 Log.w(TAG, "BES firmware update in progress - skipping APK update");
                 return false;
             }
@@ -2685,7 +2701,7 @@ public class OtaHelper {
             }
 
             // Check if BES OTA already in progress
-            if (BesOtaManager.isBesOtaInProgress) {
+            if (isBesOtaInProgress()) {
                 Log.w(TAG, "BES firmware update already in progress");
                 return false;
             }
@@ -2708,13 +2724,20 @@ public class OtaHelper {
                             + serverVersion
                             + ")");
 
+            // BES OTA controller is required for version comparison and install
+            IBesOtaController otaController = getOtaController();
+            if (otaController == null) {
+                Log.w(TAG, "BES OTA controller not available - skipping BES firmware update");
+                return false;
+            }
+
             // Get current firmware version from BES device
-            byte[] currentVersion = BesOtaManager.getCurrentFirmwareVersion();
-            byte[] serverVersionBytes = BesOtaManager.parseServerVersionCode(serverVersion);
+            byte[] currentVersion = otaController.getCurrentFirmwareVersion();
+            byte[] serverVersionBytes = otaController.parseServerVersionCode(serverVersion);
 
             // Compare versions if both available
             if (currentVersion != null && serverVersionBytes != null) {
-                boolean isNewer = BesOtaManager.isNewerVersion(serverVersionBytes, currentVersion);
+                boolean isNewer = otaController.isNewerVersion(serverVersionBytes, currentVersion);
                 Log.d(
                         TAG,
                         "Current firmware: "
@@ -2789,7 +2812,7 @@ public class OtaHelper {
             }
 
             Log.i(TAG, "BES firmware ready - starting install phase");
-            BesOtaManager manager = besOtaRegistry.getInstance();
+            IBesOtaController manager = besOtaRegistry.getInstance();
             if (manager != null) {
                 Log.i(TAG, "Starting BES firmware update from: " + OtaConstants.BES_FIRMWARE_PATH);
                 boolean started = manager.startFirmwareUpdate(OtaConstants.BES_FIRMWARE_PATH);
@@ -3005,7 +3028,7 @@ public class OtaHelper {
                 return false;
             }
 
-            if (BesOtaManager.isBesOtaInProgress) {
+            if (isBesOtaInProgress()) {
                 Log.w(TAG, "BES firmware update in progress - skipping MTK firmware update");
                 return false;
             }
@@ -4023,12 +4046,13 @@ public class OtaHelper {
      */
     public static boolean debugInstallBesFirmware(Context context) {
         try {
-            BesOtaRegistry registry =
+            IBesOtaRegistry registry =
                     dagger.hilt.android.EntryPointAccessors.fromApplication(
                                     context.getApplicationContext(), AsgClientEntryPoint.class)
                             .besOtaRegistry();
             // Check if BES OTA is already in progress - don't interrupt it!
-            if (BesOtaManager.isBesOtaInProgress) {
+            IBesOtaController activeController = registry.getInstance();
+            if (activeController != null && activeController.isBesOtaInProgress()) {
                 Log.w(TAG, "DEBUG: BES OTA already in progress - skipping to avoid interruption");
                 return false;
             }
@@ -4049,14 +4073,14 @@ public class OtaHelper {
             Log.w(TAG, "⚠️ DEBUG: File size: " + firmwareFile.length() + " bytes");
             Log.w(TAG, "⚠️ DEBUG: Skipping all checks - version, mutual exclusion, SHA256");
 
-            // Get BesOtaManager singleton
-            BesOtaManager manager = registry.getInstance();
+            // Get the active BES OTA controller
+            IBesOtaController manager = registry.getInstance();
             if (manager == null) {
-                Log.e(TAG, "DEBUG: BesOtaManager not available - is this a K900 device?");
+                Log.e(TAG, "DEBUG: BES OTA controller not available - is this a K900 device?");
                 return false;
             }
 
-            Log.i(TAG, "DEBUG: Starting BES firmware update via BesOtaManager");
+            Log.i(TAG, "DEBUG: Starting BES firmware update via BES OTA controller");
             boolean started = manager.startFirmwareUpdate(OtaConstants.BES_FIRMWARE_PATH);
 
             if (started) {

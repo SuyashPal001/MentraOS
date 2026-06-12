@@ -2,7 +2,6 @@ package com.mentra.asg_client.service.core;
 
 import android.util.Log;
 import androidx.annotation.NonNull;
-import com.mentra.asg_client.io.bes.BesOtaRegistry;
 import com.mentra.asg_client.io.bluetooth.core.BluetoothManagerFactory;
 import com.mentra.asg_client.io.bluetooth.interfaces.ICompanionTransport;
 import com.mentra.asg_client.io.file.core.FileManager;
@@ -10,6 +9,7 @@ import com.mentra.asg_client.io.hardware.interfaces.IHardwareManager;
 import com.mentra.asg_client.io.network.core.NetworkManagerFactory;
 import com.mentra.asg_client.io.network.interfaces.INetworkManager;
 import com.mentra.asg_client.io.ota.helpers.OtaHelper;
+import com.mentra.asg_client.io.ota.interfaces.IBesOtaRegistry;
 import com.mentra.asg_client.io.peripheral.IPeripheralBus;
 import com.mentra.asg_client.io.peripheral.SimplePeripheralBus;
 import com.mentra.asg_client.service.communication.interfaces.ICommunicationManager;
@@ -64,7 +64,7 @@ public final class ServiceInitializer {
             @NonNull FileManager fileManager,
             @NonNull OtaHelper otaHelper,
             @NonNull IHardwareManager hardwareManager,
-            @NonNull BesOtaRegistry besOtaRegistry,
+            @NonNull IBesOtaRegistry besOtaRegistry,
             @NonNull Set<CommandProtocolDetector.ProtocolDetectionStrategy> protocolStrategies) {
         android.content.Context context = service;
 
