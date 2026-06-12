@@ -10,10 +10,10 @@ import androidx.annotation.NonNull;
 import com.mentra.asg_client.audio.AudioAssets;
 import com.mentra.asg_client.camera.CameraNeoService;
 import com.mentra.asg_client.camera.lifecycle.PhotoExifMetadataWriter;
-import com.mentra.asg_client.hardware.K900RgbLedController;
 import com.mentra.asg_client.io.file.core.FileManager;
 import com.mentra.asg_client.io.hardware.core.HardwareManagerFactory;
 import com.mentra.asg_client.io.hardware.interfaces.IHardwareManager;
+import com.mentra.asg_client.io.hardware.interfaces.RgbLedConstants;
 import com.mentra.asg_client.io.media.interfaces.ServiceCallbackInterface;
 import com.mentra.asg_client.io.media.managers.MediaUploadQueueManager;
 import com.mentra.asg_client.io.media.upload.MediaUploadService;
@@ -400,7 +400,7 @@ public class MediaCaptureService {
      * brightness)
      */
     private void triggerPhotoFlashLed() {
-        triggerPhotoFlashLed(K900RgbLedController.DEFAULT_RGB_LED_BRIGHTNESS);
+        triggerPhotoFlashLed(RgbLedConstants.DEFAULT_BRIGHTNESS);
     }
 
     /**
@@ -424,7 +424,7 @@ public class MediaCaptureService {
 
     /** Trigger solid white LED for video recording duration (default brightness) */
     private void triggerVideoRecordingLed() {
-        triggerVideoRecordingLed(K900RgbLedController.DEFAULT_RGB_LED_BRIGHTNESS);
+        triggerVideoRecordingLed(RgbLedConstants.DEFAULT_BRIGHTNESS);
     }
 
     /**

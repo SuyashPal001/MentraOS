@@ -19,11 +19,11 @@ import android.util.Log;
 import android.util.Size;
 import com.dev.api.DevApi;
 import com.mentra.asg_client.camera.UvcStreamingState;
-import com.mentra.asg_client.hardware.K900RgbLedController;
 import com.mentra.asg_client.io.bes.BesOtaRegistry;
 import com.mentra.asg_client.io.bluetooth.interfaces.TransportListener;
 import com.mentra.asg_client.io.file.core.FileManager;
 import com.mentra.asg_client.io.hardware.interfaces.IHardwareManager;
+import com.mentra.asg_client.io.hardware.interfaces.RgbLedConstants;
 import com.mentra.asg_client.io.media.core.MediaCaptureService;
 import com.mentra.asg_client.io.media.interfaces.ServiceCallbackInterface;
 import com.mentra.asg_client.io.media.managers.MediaUploadQueueManager;
@@ -402,8 +402,7 @@ public class AsgClientService extends Service implements NetworkStateListener, T
             if (hardwareManager.supportsRgbLed()) {
                 sendRgbLedControlAuthority(true);
                 hardwareManager.setRgbLedSolidWhite(
-                        UVC_STREAMING_LED_DURATION_MS,
-                        K900RgbLedController.DEFAULT_RGB_LED_BRIGHTNESS);
+                        UVC_STREAMING_LED_DURATION_MS, RgbLedConstants.DEFAULT_BRIGHTNESS);
                 Log.i(TAG, "UVC streaming RGB ring LED on (solid white)");
             } else {
                 Log.w(TAG, "RGB LED not supported on this device");
