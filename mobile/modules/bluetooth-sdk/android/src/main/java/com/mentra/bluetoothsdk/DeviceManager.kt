@@ -16,6 +16,7 @@ import com.mentra.bluetoothsdk.services.ForegroundService
 import com.mentra.bluetoothsdk.services.PhoneMic
 import com.mentra.bluetoothsdk.sgcs.G1
 import com.mentra.bluetoothsdk.sgcs.G2
+import com.mentra.bluetoothsdk.sgcs.HeyCyan
 import com.mentra.bluetoothsdk.sgcs.Mach1
 import com.mentra.bluetoothsdk.sgcs.MentraLive
 import com.mentra.bluetoothsdk.sgcs.MentraNex
