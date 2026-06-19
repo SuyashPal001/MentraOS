@@ -274,7 +274,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "expo-build-properties",
         {
           android: {
-            minSdkVersion: 28,
+            minSdkVersion: 24,
             targetSdkVersion: 35,
             compileSdkVersion: 36,
             enableCoreLibraryDesugaring: true,
@@ -362,5 +362,10 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
       tsconfigPaths: true,
       typedRoutes: true,
     },
+    extra: {
+      eas: {
+        projectId: "a1773aa3-b8c4-4093-91d2-d28b647797b1"
+      }
+    }
   }
 }
