@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/@mentra/miniapp-cli/schema/miniapp.schema.json",
+  "packageName": "com.mentra.agentcoach",
+  "version": "1.0.0",
+  "name": "Agentic Coach",
+  "description": "An autonomous sports & fitness AI coach running locally inside MentraOS, powered by Mastra and Gemini 2.5 Flash.",
+  "icon": "icon.png",
+  "type": "standard",
+  "sdkVersion": "0.3.0",
+  "minHostVersion": "1.42.0",
+  "entry": {
+    "background": "background/index.js",
+    "ui": "ui/index.html"
+  },
+  "permissions": [
+    {
+      "type": "MICROPHONE",
+      "description": "Used for live coaching voice interactions"
+    },
+    {
+      "type": "CAMERA",
+      "description": "Used for posture and squat form visual assessment"
+    },
+    {
+      "type": "LOCATION",
+      "description": "Used for tracking running speed, route, and pace"
+    }
+  ],
+  "hardwareRequirements": [
+    {
+      "type": "DISPLAY",
+      "level": "REQUIRED",
+      "description": "Shows real-time pacing, metronome cues, and coaching form corrections on the HUD"
+    },
+    {
+      "type": "MICROPHONE",
+      "level": "REQUIRED",
+      "description": "Captures speech for coaching cues and voice commands"
+    },
+    {
+      "type": "CAMERA",
+      "level": "OPTIONAL",
+      "description": "Analyzes posture and exercises visually"
+    }
+  ],
+  "port": 3145
+}
