@@ -7,6 +7,8 @@ export const getGlassesImage = (glasses: string | null) => {
     case "Vuzix Z100":
     case "Vuzix Ultralite":
       return require("../../assets/glasses/vuzix_z100.png")
+    case "HeyCyan":
+      return require("../../assets/glasses/unknown_wearable.png")
     case "Mentra Mach1":
     case "Mach1":
       return require("../../assets/glasses/vuzix_z100.png")

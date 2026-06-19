@@ -143,6 +143,17 @@ export default function PairingSuccessScreen() {
         },
       ]
       break
+    case DeviceTypes.HEYCYAN:
+      steps = [
+        {
+          name: "Start Onboarding",
+          type: "image",
+          source: glassesImage,
+          transition: false,
+          title: translate("common:success"),
+        },
+      ]
+      break
     case DeviceTypes.G1:
     default:
       steps = [
