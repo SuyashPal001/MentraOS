@@ -23,6 +23,7 @@ enum class DeviceModel(val deviceType: String) {
     Z100(DeviceTypes.Z100),
     FRAME(DeviceTypes.FRAME),
     SIMULATED(DeviceTypes.SIMULATED),
+    HEYCYAN(DeviceTypes.HEYCYAN),
     R1(ControllerTypes.R1);
 
     companion object {

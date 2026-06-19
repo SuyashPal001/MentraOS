@@ -1114,6 +1114,8 @@ class DeviceManager {
             sgc = createOptionalMach1Sgc(DeviceTypes.MACH1)
         } else if (wearable.contains(DeviceTypes.Z100)) {
             sgc = createOptionalMach1Sgc(DeviceTypes.Z100)
+        } else if (wearable.contains(DeviceTypes.HEYCYAN)) {
+            sgc = HeyCyan()
         } else if (wearable.contains(DeviceTypes.FRAME)) {
             // sgc = FrameManager()
         }

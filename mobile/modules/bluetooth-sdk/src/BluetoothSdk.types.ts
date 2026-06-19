@@ -479,6 +479,7 @@ export const DeviceModels = {
   Z100: "Vuzix Z100",
   Frame: "Brilliant Frame",
   R1: "Even Realities R1",
+  HeyCyan: "HeyCyan",
 } as const
 
 export type DeviceModel = (typeof DeviceModels)[keyof typeof DeviceModels]
