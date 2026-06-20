@@ -376,6 +376,15 @@ function withAndroidManifestModifications(config: any) {
         app.$["android:enableOnBackInvokedCallback"] = "true"
       }
 
+      // Add tools:replace="android:allowBackup" to fix manifest merger collisions
+      if (app.$["tools:replace"]) {
+        if (!app.$["tools:replace"].includes("android:allowBackup")) {
+          app.$["tools:replace"] += ",android:allowBackup"
+        }
+      } else {
+        app.$["tools:replace"] = "android:allowBackup"
+      }
+
       // Inject Google Navigation SDK API key from env. Read at build time.
       // The Nav SDK reads this meta-data tag from the merged manifest at runtime.
       //
