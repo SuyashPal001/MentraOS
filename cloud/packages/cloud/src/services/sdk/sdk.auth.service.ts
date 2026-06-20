@@ -140,6 +140,13 @@ export async function validateApiKey(packageName: string, apiKey: string): Promi
     return false;
   }
 
+  // Dev bypass: accepts a hardcoded key for the coach app during demo
+  const devKey = process.env.DEV_API_KEY ?? "demo-coach-key-2024";
+  if (packageName === "com.mentra.coach" && apiKey === devKey) {
+    logger.debug({ packageName }, "Coach dev key accepted");
+    return true;
+  }
+
   const candidateHash = hashApiKey(apiKey);
 
   // 1) Attempt cache validation
