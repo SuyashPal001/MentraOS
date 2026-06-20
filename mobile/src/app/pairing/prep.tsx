@@ -308,6 +308,21 @@ export default function PairingPrepScreen() {
     )
   }
 
+  const HeyCyanPairingGuide = () => {
+    return (
+      <View className="flex-1 flex-col justify-start mt-6">
+        <Text
+          className="text-lg text-secondary-foreground"
+          text="1. Make sure your HeyCyan glasses are charged."
+        />
+        <Text
+          className="text-lg text-secondary-foreground"
+          text="2. Turn them on to enter pairing mode."
+        />
+      </View>
+    )
+  }
+
   const G1PairingGuide = () => {
     const {theme} = useAppTheme()
 
@@ -422,6 +437,8 @@ export default function PairingPrepScreen() {
         return <VuzixZ100PairingGuide />
       case DeviceTypes.NEX:
         return <MentraDisplayGlassesPairingGuide />
+      case DeviceTypes.HEYCYAN:
+        return <HeyCyanPairingGuide />
     }
 
     throw new Error(`Unknown model name: ${deviceModel}`)
