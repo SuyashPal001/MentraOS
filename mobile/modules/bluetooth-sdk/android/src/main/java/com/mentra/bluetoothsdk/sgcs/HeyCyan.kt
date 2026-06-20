@@ -170,7 +170,7 @@ class HeyCyan : SGCManager() {
 
                 val hasHeyCyanService = result.scanRecord?.serviceUuids?.contains(android.os.ParcelUuid(SERVICE_UUID)) == true
 
-                if (name.contains("HeyCyan", ignoreCase = true) || name.startsWith("O_") || name.startsWith("Q_") || hasHeyCyanService) {
+                if (name.contains("HeyCyan", ignoreCase = true) || name.startsWith("O_") || name.startsWith("Q_") || name.startsWith("AIMB") || hasHeyCyanService) {
                     Bridge.log("$TAG bleScanCallback onScanResult: $name address $address")
                     synchronized(foundDeviceNames) {
                         if (!foundDeviceNames.contains(address)) {
