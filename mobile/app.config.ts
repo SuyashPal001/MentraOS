@@ -274,7 +274,7 @@ module.exports = ({config}: ConfigContext): Partial<ExpoConfig> => {
         "expo-build-properties",
         {
           android: {
-            minSdkVersion: 24,
+            minSdkVersion: 28,
             targetSdkVersion: 35,
             compileSdkVersion: 36,
             enableCoreLibraryDesugaring: true,
