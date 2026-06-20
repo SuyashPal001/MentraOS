@@ -28,9 +28,11 @@ class HeyCyan : SGCManager() {
     companion object {
         private const val TAG = "HeyCyan"
 
-        // BLE UUIDs from Python SDK Docs
-        private val SERVICE_UUID: UUID = UUID.fromString("19B10000-E8F2-537E-4F6C-D104768A1214")
-        private val CHAR_UUID: UUID = UUID.fromString("19B10001-E8F2-537E-4F6C-D104768A1214")
+        // BLE UUIDs extracted from vendor glasses_sdk AAR (com.oudmon.ble.base.communication.Constants)
+        private val SERVICE_UUID: UUID = UUID.fromString("6e40fff0-b5a3-f393-e0a9-e50e24dcca9e")
+        private val WRITE_CHAR_UUID: UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e")
+        private val NOTIFY_CHAR_UUID: UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e")
+        private val CCCD_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
     }
 
     private var bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -41,6 +43,7 @@ class HeyCyan : SGCManager() {
     private var mainDevice: BluetoothDevice? = null
     private var mainGlassGatt: BluetoothGatt? = null
     private var mainWriteChar: BluetoothGattCharacteristic? = null
+    private var mainNotifyChar: BluetoothGattCharacteristic? = null
 
     init {
         type = "HeyCyan"
@@ -165,10 +168,9 @@ class HeyCyan : SGCManager() {
                 val name = device.name ?: ""
                 val address = device.address
 
-                // The Python SDK looks for "HeyCyan" in the name or the specific UUID
                 val hasHeyCyanService = result.scanRecord?.serviceUuids?.contains(android.os.ParcelUuid(SERVICE_UUID)) == true
 
-                if (name.contains("HeyCyan", ignoreCase = true) || hasHeyCyanService) {
+                if (name.contains("HeyCyan", ignoreCase = true) || name.startsWith("O_") || name.startsWith("Q_") || hasHeyCyanService) {
                     Bridge.log("$TAG bleScanCallback onScanResult: $name address $address")
                     synchronized(foundDeviceNames) {
                         if (!foundDeviceNames.contains(address)) {
@@ -214,7 +216,7 @@ class HeyCyan : SGCManager() {
 
         Bridge.log("$TAG: Connecting to device ${mainDevice?.name} ($id)")
         
-        mainGlassGatt = mainDevice?.connectGatt(null, false, object : BluetoothGattCallback() {
+        mainGlassGatt = mainDevice?.connectGatt(Bridge.getContext(), false, object : BluetoothGattCallback() {
             override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     Bridge.log("$TAG: Connected to GATT server. Discovering services...")
@@ -231,32 +233,35 @@ class HeyCyan : SGCManager() {
                     Bridge.log("$TAG: Services discovered.")
                     val service = gatt?.getService(SERVICE_UUID)
                     if (service != null) {
-                        mainWriteChar = service.getCharacteristic(CHAR_UUID)
-                        if (mainWriteChar != null) {
-                            Bridge.log("$TAG: Found HeyCyan characteristic. Connection fully established!")
-                            
-                            // Enable notifications
-                            gatt.setCharacteristicNotification(mainWriteChar, true)
-                            
+                        mainWriteChar = service.getCharacteristic(WRITE_CHAR_UUID)
+                        mainNotifyChar = service.getCharacteristic(NOTIFY_CHAR_UUID)
+
+                        if (mainWriteChar != null && mainNotifyChar != null) {
+                            // Enable BLE notifications on the notify characteristic
+                            gatt.setCharacteristicNotification(mainNotifyChar, true)
+                            val descriptor = mainNotifyChar!!.getDescriptor(CCCD_UUID)
+                            if (descriptor != null) {
+                                descriptor.value = android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                                gatt.writeDescriptor(descriptor)
+                            }
+
+                            Bridge.log("$TAG: HeyCyan connected and ready. Handing off to MentraOS.")
                             DeviceStore.apply("glasses", "connected", true)
                             DeviceStore.apply("glasses", "fullyBooted", true)
-                            Bridge.sendBluetoothState()
                         } else {
-                            Log.e(TAG, "HeyCyan characteristic not found!")
+                            Log.e(TAG, "HeyCyan write=${mainWriteChar != null} notify=${mainNotifyChar != null} — characteristic missing")
                         }
                     } else {
-                        Log.e(TAG, "HeyCyan service not found!")
+                        Bridge.log("$TAG: HeyCyan main service not found. Services found: ${gatt?.services?.map { it.uuid }}")
                     }
                 } else {
-                    Log.w(TAG, "onServicesDiscovered received: $status")
+                    Log.w(TAG, "onServicesDiscovered status: $status")
                 }
             }
 
             override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
-                if (characteristic?.uuid == CHAR_UUID) {
-                    val data = characteristic?.value
-                    // Bridge.log("$TAG: Received data: ${data?.joinToString("") { "%02x".format(it) }}")
-                }
+                val data = characteristic?.value ?: return
+                Bridge.log("$TAG: notify data: ${data.joinToString("") { "%02x".format(it) }}")
             }
         })
     }
@@ -273,6 +278,7 @@ class HeyCyan : SGCManager() {
         mainGlassGatt = null
         mainDevice = null
         mainWriteChar = null
+        mainNotifyChar = null
     }
 
     override fun ping() {}

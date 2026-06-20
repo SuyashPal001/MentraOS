@@ -86,6 +86,7 @@ gradle.taskGraph.whenReady {
 
 android {
     namespace "com.mentra.lc3Lib"
+    ndkVersion "26.1.10909125"
     compileSdk 33
 
     publishing {

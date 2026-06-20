@@ -210,6 +210,7 @@ if (useManagedAndroidSdkVersions) {
 
 android {
   namespace "com.mentra.bluetoothsdk"
+  ndkVersion "26.1.10909125"
   defaultConfig {
     versionCode 1
     versionName project.version
@@ -308,10 +309,16 @@ dependencies {
     // Vuzix Z100
     implementation 'com.vuzix:ultralite-sdk-android:1.8'
     implementation 'com.squareup.picasso:picasso:2.8'
+
+    // HeyCyan SDK
+    implementation 'com.oudmon.ble:glasses-sdk:1.0.0@aar'
   } else {
     compileOnly project(':silero')
     compileOnly 'com.vuzix:ultralite-sdk-android:1.8'
     compileOnly 'com.squareup.picasso:picasso:2.8'
+
+    // HeyCyan SDK
+    compileOnly 'com.oudmon.ble:glasses-sdk:1.0.0@aar'
   }
 
   implementation 'com.google.protobuf:protobuf-java:4.32.0'
